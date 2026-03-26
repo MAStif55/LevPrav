@@ -667,7 +667,7 @@ exports.triggerDeploy = onRequest({ region: "europe-west1", cors: true, secrets:
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    event_type: "trigger-deploy",
+                    event_type: "manual-deploy",
                 }),
             }
         );
