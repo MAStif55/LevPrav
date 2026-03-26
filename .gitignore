@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+functions/node_modules/
+
+# Next.js / Build output
+.next/
+out/
+build/
+dist/
+
+# Environment variables & Secrets (CRITICAL)
+.env
+.env.*
+!.env.example
+functions/.env
+*firebase-adminsdk*.json
+*serviceAccount*.json
+SECRETS_TODO.md
+
+# Firebase & Logs
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+npm-debug.log*

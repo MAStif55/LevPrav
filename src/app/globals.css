@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #FAF9F6;
+  --foreground: #333333;
+
+  /* LevPrav Design System Colors */
+  --canvas: #FAF9F6;
+  --lion-amber-start: #E67E22;
+  --lion-amber-end: #F1C40F;
+  --forest-green: #2D5A27;
+  --graphite: #333333;
+
+  /* Typography */
+  --font-heading: 'Montserrat Alternates', sans-serif;
+  --font-body: 'Open Sans', sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* LevPrav Custom Colors */
+  --color-canvas: var(--canvas);
+  --color-lion-amber-start: var(--lion-amber-start);
+  --color-lion-amber-end: var(--lion-amber-end);
+  --color-forest-green: var(--forest-green);
+  --color-graphite: var(--graphite);
+
+  /* Fonts */
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+}
+
+
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+/* Gradient utility class */
+.bg-lion-gradient {
+  background: linear-gradient(135deg, var(--lion-amber-start) 0%, var(--lion-amber-end) 100%);
+}
+
+/* Rounded button utility */
+.btn-rounded {
+  border-radius: 30px;
+}
+
+/* Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 1s ease-out forwards;
+}

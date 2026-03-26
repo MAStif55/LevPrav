@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access to products
+    match /products/{document=**} {
+      allow read: if true;
+      allow write: if true; // TODO: Restrict to admin only
+    }
+    
+    // Allow public read access to calculator options
+    match /calculator_options/{document=**} {
+      allow read: if true;
+      allow write: if true; // TODO: Restrict to admin only
+    }
+    
+    // Orders: public can read (for payment status page) and create, 
+    // only authenticated users can update/delete
+    match /orders/{document=**} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Settings: public read, admin write
+    match /settings/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Category Variations: public read, admin write
+    match /categoryVariations/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Subcategories: public read, admin write
+    match /subcategories/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Reviews: public read, admin write
+    match /reviews/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
