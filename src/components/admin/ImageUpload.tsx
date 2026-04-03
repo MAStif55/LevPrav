@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
-import { Loader2, Upload, X, ImageIcon, Download } from 'lucide-react';
+import { Loader2, Upload, X, ImageIcon, Download, RefreshCw } from 'lucide-react';
 import { ProductImage } from '@/types/product';
 
 interface ImageUploadProps {
@@ -135,6 +135,8 @@ function getFullUrl(image: string | ProductImage): string {
 export default function ImageUpload({ value, onChange }: ImageUploadProps) {
     const [uploading, setUploading] = useState(false);
     const [dragOver, setDragOver] = useState(false);
+    const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
+    const replaceInputRef = useRef<HTMLInputElement>(null);
 
     const handleUpload = async (file: File) => {
         if (!file.type.startsWith('image/')) {
@@ -187,6 +189,57 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
         onChange(newImages);
     };
 
+    const handleReplaceClick = (index: number) => {
+        setReplacingIndex(index);
+        // Trigger the hidden file input
+        if (replaceInputRef.current) {
+            replaceInputRef.current.value = '';
+            replaceInputRef.current.click();
+        }
+    };
+
+    const handleReplaceFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || replacingIndex === null) {
+            setReplacingIndex(null);
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            alert('Please upload an image file');
+            setReplacingIndex(null);
+            return;
+        }
+
+        setUploading(true);
+        try {
+            // Process the new file into 3 WebP variants
+            const newProductImage = await processAndUploadImage(file);
+
+            // Merge: keep existing SEO metadata (alt, keywords), replace URLs
+            const existingImage = value[replacingIndex];
+            const mergedImage: ProductImage = {
+                ...newProductImage,
+            };
+
+            // Preserve SEO metadata from the existing image
+            if (typeof existingImage !== 'string') {
+                if (existingImage.alt) mergedImage.alt = existingImage.alt;
+                if (existingImage.keywords) mergedImage.keywords = existingImage.keywords;
+            }
+
+            const newImages = [...value];
+            newImages[replacingIndex] = mergedImage;
+            onChange(newImages);
+        } catch (error) {
+            console.error('Replace failed', error);
+            alert('Failed to replace image!');
+        } finally {
+            setUploading(false);
+            setReplacingIndex(null);
+        }
+    };
+
     const downloadImage = async (image: string | ProductImage, index: number) => {
         const url = getFullUrl(image);
         try {
@@ -234,12 +287,39 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
 
     return (
         <div className="space-y-4">
+            {/* Hidden input for replace functionality */}
+            <input
+                ref={replaceInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleReplaceFileChange}
+                disabled={uploading}
+            />
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {value.map((image, idx) => (
                     <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border group">
                         <img src={getDisplayUrl(image)} alt="Product" className="w-full h-full object-cover" />
+
+                        {/* Replacing overlay */}
+                        {uploading && replacingIndex === idx && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                                <Loader2 className="animate-spin text-white" size={32} />
+                            </div>
+                        )}
+
                         {/* Button container */}
                         <div className="absolute top-1 right-1 flex gap-1">
+                            <button
+                                type="button"
+                                onClick={() => handleReplaceClick(idx)}
+                                className="bg-amber-500 text-white p-1 rounded-full hover:bg-amber-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Заменить файл (SEO-данные сохранятся)"
+                                disabled={uploading}
+                            >
+                                <RefreshCw size={14} />
+                            </button>
                             <button
                                 type="button"
                                 onClick={() => downloadImage(image, idx)}
@@ -251,8 +331,8 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
                             <button
                                 type="button"
                                 onClick={() => removeImage(idx)}
-                                className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
-                                title="Delete"
+                                className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Удалить"
                             >
                                 <X size={14} />
                             </button>
@@ -270,7 +350,7 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
                         : 'border-gray-300 hover:border-primary hover:bg-primary/5'
                         }`}
                 >
-                    {uploading ? (
+                    {uploading && replacingIndex === null ? (
                         <Loader2 className="animate-spin text-primary" size={32} />
                     ) : (
                         <>

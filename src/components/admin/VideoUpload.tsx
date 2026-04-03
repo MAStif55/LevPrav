@@ -6,7 +6,7 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import Cropper, { Area } from 'react-easy-crop';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
-import { Loader2, Video, X, Crop, Scissors } from 'lucide-react';
+import { Loader2, Video, X, Crop, Scissors, RefreshCw } from 'lucide-react';
 import { useTranslation } from '@/contexts/LanguageContext';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -317,11 +317,28 @@ export default function VideoUpload({ videoUrl, videoPreviewUrl, onChange }: Vid
         }
     };
 
+    const replaceInputRef = useRef<HTMLInputElement>(null);
+
+    const handleReplaceClick = () => {
+        if (replaceInputRef.current) {
+            replaceInputRef.current.value = '';
+            replaceInputRef.current.click();
+        }
+    };
+
     // If there is an existing uploaded video but no file selected in cropper mode
     const hasExistingVideo = (videoUrl || videoPreviewUrl) && !selectedFile;
     if (hasExistingVideo) {
         return (
             <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border group w-full max-w-sm">
+                <input
+                    ref={replaceInputRef}
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    disabled={uploading}
+                />
                 <video
                     src={videoPreviewUrl || videoUrl}
                     className="w-full h-full object-cover pointer-events-none"
@@ -330,14 +347,24 @@ export default function VideoUpload({ videoUrl, videoPreviewUrl, onChange }: Vid
                     loop
                     autoPlay
                 />
-                <button
-                    type="button"
-                    onClick={clearSelection}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title={locale === 'ru' ? 'Удалить видео' : 'Remove video'}
-                >
-                    <X size={16} />
-                </button>
+                <div className="absolute top-2 right-2 flex gap-1">
+                    <button
+                        type="button"
+                        onClick={handleReplaceClick}
+                        className="bg-amber-500 text-white p-1 rounded-full hover:bg-amber-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title={locale === 'ru' ? 'Заменить видео' : 'Replace video'}
+                    >
+                        <RefreshCw size={16} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={clearSelection}
+                        className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title={locale === 'ru' ? 'Удалить видео' : 'Remove video'}
+                    >
+                        <X size={16} />
+                    </button>
+                </div>
             </div>
         );
     }
