@@ -5,7 +5,7 @@
  * Requires a Firebase service account key file (service-account.json)
  */
 
-import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
 
