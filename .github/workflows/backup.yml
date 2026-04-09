@@ -58,13 +58,13 @@ jobs:
       - name: Create Encrypted Archive
         run: |
           # Use 7z with AES-256 and encrypt headers
-          7z a -tzip -p"$BACKUP_ARCHIVE_PASSWORD" -mem=AES256 -mhe=on levprav-backup-${{ steps.timestamp.outputs.date }}.zip ./backup-temp/*
+          7z a -p"$BACKUP_ARCHIVE_PASSWORD" -mhe=on levprav-backup-${{ steps.timestamp.outputs.date }}.7z ./backup-temp/*
         env:
           BACKUP_ARCHIVE_PASSWORD: ${{ secrets.BACKUP_ARCHIVE_PASSWORD }}
 
       - name: Generate Recovery Guide
         run: |
-          printf "# Firebase Recovery Guide\n\n## Restore Instructions\n\n1. Download the attached \`.zip\` file.\n2. Extract the archive using the master backup password.\n3. Firestore data is stored as JSON files per collection.\n4. Storage data mirrors the bucket structure.\n\nNever commit the unencrypted backup to a public repository.\n" > RECOVERY.md
+          printf "# Firebase Recovery Guide\n\n## Restore Instructions\n\n1. Download the attached \`.7z\` file.\n2. Extract the archive using the master backup password.\n3. Firestore data is stored as JSON files per collection.\n4. Storage data mirrors the bucket structure.\n\nNever commit the unencrypted backup to a public repository.\n" > RECOVERY.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -72,7 +72,7 @@ jobs:
           tag_name: backup-${{ steps.timestamp.outputs.date }}
           name: Automated Backup ${{ steps.timestamp.outputs.date }}
           body_path: RECOVERY.md
-          files: levprav-backup-${{ steps.timestamp.outputs.date }}.zip
+          files: levprav-backup-${{ steps.timestamp.outputs.date }}.7z
           draft: false
           prerelease: false
 
