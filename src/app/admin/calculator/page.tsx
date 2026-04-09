@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCalculatorOptions, updateCalculatorOption } from '@/lib/firestore-utils';
+import { CalculatorRepository } from '@/lib/data';
 import { MaterialOption, CoatingOption, FormatOption } from '@/types/product';
 import { Save, Plus, Trash2, Loader2, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@/contexts/LanguageContext';
@@ -45,7 +45,7 @@ export default function AdminCalculatorPage() {
 
     const loadOptions = async () => {
         try {
-            const data = await getCalculatorOptions();
+            const data = await CalculatorRepository.getOptions();
             setMaterials(data.materials);
             setCoatings(data.coatings);
             setFormats(data.formats);
@@ -66,9 +66,9 @@ export default function AdminCalculatorPage() {
         setSaving(true);
         try {
             await Promise.all([
-                updateCalculatorOption('materials', materials),
-                updateCalculatorOption('coatings', coatings),
-                updateCalculatorOption('formats', formats),
+                CalculatorRepository.updateOption('materials', materials),
+                CalculatorRepository.updateOption('coatings', coatings),
+                CalculatorRepository.updateOption('formats', formats),
             ]);
             // Update original data after successful save
             originalData.current = {
@@ -89,19 +89,19 @@ export default function AdminCalculatorPage() {
         setSaving(true);
         try {
             if (type === 'materials') {
-                await updateCalculatorOption('materials', materials);
+                await CalculatorRepository.updateOption('materials', materials);
                 if (originalData.current) {
                     originalData.current.materials = JSON.parse(JSON.stringify(materials));
                 }
             }
             if (type === 'coatings') {
-                await updateCalculatorOption('coatings', coatings);
+                await CalculatorRepository.updateOption('coatings', coatings);
                 if (originalData.current) {
                     originalData.current.coatings = JSON.parse(JSON.stringify(coatings));
                 }
             }
             if (type === 'formats') {
-                await updateCalculatorOption('formats', formats);
+                await CalculatorRepository.updateOption('formats', formats);
                 if (originalData.current) {
                     originalData.current.formats = JSON.parse(JSON.stringify(formats));
                 }

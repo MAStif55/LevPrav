@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import Cropper, { Area } from 'react-easy-crop';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { StorageService } from '@/lib/data';
 import { Loader2, Video, X, Crop, Scissors, RefreshCw } from 'lucide-react';
 import { useTranslation } from '@/contexts/LanguageContext';
 import Slider from 'rc-slider';
@@ -279,16 +278,7 @@ export default function VideoUpload({ videoUrl, videoPreviewUrl, onChange }: Vid
 
                 // Upload to Firebase Storage
                 const storageFilename = `videos/${timestamp}${variant.suffix}.mp4`;
-                const storageRef = ref(storage, storageFilename);
-
-                setProgressLabel(
-                    locale === 'ru'
-                        ? `Загрузка ${variant.name}...`
-                        : `Uploading ${variant.name}...`
-                );
-
-                await uploadBytes(storageRef, blob, VIDEO_METADATA);
-                const publicUrl = await getDownloadURL(storageRef);
+                const publicUrl = await StorageService.uploadFile(storageFilename, blob, VIDEO_METADATA);
                 results[variant.key] = publicUrl;
             }
 

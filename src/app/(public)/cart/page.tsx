@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { StaticLink } from '@/components/StaticLink';
 import { useTranslation } from '@/contexts/LanguageContext';
 import { useCartStore } from '@/store/cart-store';
-import { getCalculatorOptions } from '@/lib/firestore-utils';
+import { CalculatorRepository } from '@/lib/data';
 import { formatCurrency } from '@/utils/currency';
 import { Trash2 } from 'lucide-react';
 import { MaterialOption, CoatingOption, FormatOption } from '@/types/product';
@@ -22,7 +22,7 @@ export default function CartPage() {
     useEffect(() => {
         const loadOptions = async () => {
             try {
-                const data = await getCalculatorOptions();
+                const data = await CalculatorRepository.getOptions();
                 setMaterials(data.materials);
                 setCoatings(data.coatings);
                 setFormats(data.formats);

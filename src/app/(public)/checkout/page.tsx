@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from '@/contexts/LanguageContext';
 import { useCartStore } from '@/store/cart-store';
 import { getLocalizedSchema, CheckoutFormData } from '@/lib/checkout-schema';
-import { createOrder } from '@/lib/order-service';
+import { OrderRepository } from '@/lib/data';
 import { formatCurrency } from '@/utils/currency';
 import { ShoppingBag, Loader2, ArrowLeft, User, Mail, Phone, MapPin, Send } from 'lucide-react';
 import Link from 'next/link';
@@ -54,7 +54,7 @@ export default function CheckoutPage() {
         setIsSubmitting(true);
 
         try {
-            const result = await createOrder(items, data, getTotalPrice());
+            const result = await OrderRepository.checkoutWithCloudFunction(items, data, getTotalPrice());
 
             if (result.success && result.orderId) {
                 setIsOrderSubmitted(true); // Prevent redirect to catalog

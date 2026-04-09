@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import { Features } from '@/components/home/Features';
 import { PackCard } from '@/components/packs/PackCard';
 import { PackCardSkeleton } from '@/components/packs/PackCardSkeleton';
-import { getNewestProducts } from '@/lib/firestore-utils';
+import { ProductRepository } from '@/lib/data';
 import { StickerPack } from '@/types/product';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -19,7 +19,7 @@ export default function Home() {
     async function fetchProducts() {
       try {
         // Get 4 newest products for the featured section
-        const data = await getNewestProducts(4);
+        const data = await ProductRepository.getNewest(4);
         setFeaturedPacks(data);
       } catch (error) {
         console.error("Error fetching products:", error);

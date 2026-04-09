@@ -1,0 +1,83 @@
+name: Universal Backup System
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Decode Service Account
+        run: |
+          echo "$B64_SECRET" | base64 --decode > service-account.json
+        env:
+          B64_SECRET: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+
+      - name: Run Firestore Export
+        run: npx ts-node scripts/export-firestore.ts ./backup-temp/firestore
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ./service-account.json
+
+      - name: Set up GCP Auth for gsutil
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Run Storage Backup (parallel rsync)
+        run: |
+          mkdir -p ./backup-temp/storage
+          gsutil -m rsync -r gs://${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }} ./backup-temp/storage
+
+      - name: Generate Timestamp
+        id: timestamp
+        run: echo "date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
+
+      - name: Create Encrypted Archive
+        run: |
+          # Use 7z with AES-256 and encrypt headers
+          7z a -tzip -p"$BACKUP_ARCHIVE_PASSWORD" -mem=AES256 -mhe=on levprav-backup-${{ steps.timestamp.outputs.date }}.zip ./backup-temp/*
+        env:
+          BACKUP_ARCHIVE_PASSWORD: ${{ secrets.BACKUP_ARCHIVE_PASSWORD }}
+
+      - name: Generate Recovery Guide
+        run: |
+          printf "# Firebase Recovery Guide\n\n## Restore Instructions\n\n1. Download the attached \`.zip\` file.\n2. Extract the archive using the master backup password.\n3. Firestore data is stored as JSON files per collection.\n4. Storage data mirrors the bucket structure.\n\nNever commit the unencrypted backup to a public repository.\n" > RECOVERY.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: backup-${{ steps.timestamp.outputs.date }}
+          name: Automated Backup ${{ steps.timestamp.outputs.date }}
+          body_path: RECOVERY.md
+          files: levprav-backup-${{ steps.timestamp.outputs.date }}.zip
+          draft: false
+          prerelease: false
+
+      - name: Cleanup Secrets and Temp Data
+        if: always()
+        run: |
+          rm -f service-account.json
+          rm -rf ./backup-temp

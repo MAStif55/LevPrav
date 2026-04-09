@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { CalculatorRepository } from '@/lib/data';
 import { PackConfiguration } from '@/types/product';
 import { MaterialOption, CoatingOption, FormatOption } from '@/types/product';
 
@@ -42,8 +43,7 @@ export const useCalculatorStore = create<CalculatorState>((set, get) => ({
 
     fetchOptions: async () => {
         try {
-            const { getCalculatorOptions } = await import('@/lib/firestore-utils');
-            const data = await getCalculatorOptions();
+            const data = await CalculatorRepository.getOptions();
 
             // Validate data exists
             if (!data.materials.length || !data.formats.length) {

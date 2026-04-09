@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { SettingsRepository } from '@/lib/data';
 import { Save, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/contexts/LanguageContext';
 import Breadcrumbs from '@/components/admin/Breadcrumbs';
@@ -37,10 +36,9 @@ export default function SettingsPage() {
 
     const loadSettings = async () => {
         try {
-            const docRef = doc(db, 'config', 'store');
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                setSettings({ ...defaultSettings, ...docSnap.data() as StoreSettings });
+            const data = await SettingsRepository.getSettings();
+            if (data) {
+                setSettings({ ...defaultSettings, ...data as StoreSettings });
             }
         } catch (error) {
             console.error("Error loading settings:", error);
@@ -52,7 +50,7 @@ export default function SettingsPage() {
     const handleSave = async () => {
         setSaving(true);
         try {
-            await setDoc(doc(db, 'config', 'store'), settings);
+            await SettingsRepository.updateSettings(settings);
             alert(locale === 'ru' ? 'Настройки сохранены!' : 'Settings saved!');
         } catch (error) {
             console.error("Error saving settings:", error);

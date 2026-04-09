@@ -2,7 +2,6 @@
 
 import { Order } from '@/types/order';
 import { format } from 'date-fns';
-import { Timestamp } from 'firebase/firestore';
 import { Package, User, StickyNote, ChevronRight, ChevronLeft, Archive } from 'lucide-react';
 
 interface OrderCardProps {
@@ -12,10 +11,9 @@ interface OrderCardProps {
     columnType: 'pending' | 'completed' | 'archived';
 }
 
-// Helper to safely convert Firestore timestamp to Date
-const toDate = (timestamp: number | Timestamp | { seconds: number } | undefined): Date => {
+// Helper to safely convert timestamp to Date
+const toDate = (timestamp: number | { seconds: number } | undefined): Date => {
     if (!timestamp) return new Date();
-    if (timestamp instanceof Timestamp) return timestamp.toDate();
     if (typeof timestamp === 'number') return new Date(timestamp);
     if (typeof timestamp === 'object' && 'seconds' in timestamp) {
         return new Date(timestamp.seconds * 1000);

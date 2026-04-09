@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { StorageService } from '@/lib/data';
 import { Loader2, Upload, X, ImageIcon, Download, RefreshCw } from 'lucide-react';
 import { ProductImage } from '@/types/product';
 
@@ -102,9 +101,7 @@ async function processAndUploadImage(file: File): Promise<ProductImage> {
     const uploadResults = await Promise.all(
         IMAGE_VARIANTS.map(async (variant, idx) => {
             const filename = `uploads/${baseName}${variant.suffix}.webp`;
-            const storageRef = ref(storage, filename);
-            await uploadBytes(storageRef, variantBlobs[idx], CACHE_METADATA);
-            const url = await getDownloadURL(storageRef);
+            const url = await StorageService.uploadFile(filename, variantBlobs[idx], CACHE_METADATA);
             return { key: variant.key, url };
         })
     );

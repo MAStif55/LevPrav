@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, notFound } from "next/navigation";
 import { PackDetailsClient } from "@/components/packs/PackDetailsClient";
-import { getProductById } from "@/lib/firestore-utils";
+import { ProductRepository } from "@/lib/data";
 import { StickerPack } from "@/types/product";
 
 function PackDetailsContent() {
@@ -18,7 +18,7 @@ function PackDetailsContent() {
             return;
         }
         const loadPack = async () => {
-            const data = await getProductById(id);
+            const data = await ProductRepository.getById(id);
             setPack(data);
             setLoading(false);
         };

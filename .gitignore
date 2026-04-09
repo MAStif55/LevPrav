@@ -22,3 +22,11 @@ SECRETS_TODO.md
 firebase-debug.log
 firebase-debug.*.log
 npm-debug.log*
+
+service-account.json
+val.txt
+payload.json
+pk.json
+encrypt.js
+trigger.json
+levprav-art-firebase-adminsdk-fbsvc-9b36661e3b.json

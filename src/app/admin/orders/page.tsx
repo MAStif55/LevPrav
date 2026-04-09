@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, orderBy, query, updateDoc, doc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { OrderRepository } from '@/lib/data';
 import { Order } from '@/types/order';
 import { useTranslation } from '@/contexts/LanguageContext';
 import { OrderCard } from '@/components/admin/OrderCard';
@@ -18,9 +17,7 @@ export default function AdminOrdersPage() {
     const fetchOrders = async () => {
         setLoading(true);
         try {
-            const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-            const snapshot = await getDocs(q);
-            const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Order));
+            const data = await OrderRepository.getAll();
             setOrders(data);
         } catch (error) {
             console.error("Error fetching orders:", error);
@@ -35,7 +32,7 @@ export default function AdminOrdersPage() {
 
     const updateStatus = async (id: string, newStatus: Order['status']) => {
         try {
-            await updateDoc(doc(db, 'orders', id), { status: newStatus });
+            await OrderRepository.updateStatus(id, newStatus);
             setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
         } catch (error) {
             console.error("Error updating status:", error);
@@ -44,7 +41,7 @@ export default function AdminOrdersPage() {
 
     const updateNotes = async (id: string, notes: string) => {
         try {
-            await updateDoc(doc(db, 'orders', id), { notes });
+            await OrderRepository.updateNotes(id, notes);
             setOrders(prev => prev.map(o => o.id === id ? { ...o, notes } : o));
         } catch (error) {
             console.error("Error updating notes:", error);

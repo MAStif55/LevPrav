@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getAllProducts, deleteProduct, createProduct } from '@/lib/firestore-utils';
+import { ProductRepository } from '@/lib/data';
 import { StickerPack } from '@/types/product';
 import { Plus, Trash2, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
@@ -35,7 +35,7 @@ export default function AdminProductsPage() {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const data = await getAllProducts();
+            const data = await ProductRepository.getAll();
             setProducts(data);
         } catch (error) {
             console.error("Error fetching products:", error);
@@ -55,7 +55,7 @@ export default function AdminProductsPage() {
     const handleDelete = async () => {
         if (!itemToDelete) return;
         try {
-            await deleteProduct(itemToDelete);
+            await ProductRepository.delete(itemToDelete);
             fetchProducts();
         } catch (error) {
             console.error("Error deleting product:", error);
@@ -69,7 +69,7 @@ export default function AdminProductsPage() {
     const handleBulkDelete = async () => {
         try {
             for (const id of selectedIds) {
-                await deleteProduct(id);
+                await ProductRepository.delete(id);
             }
             setSelectedIds(new Set());
             fetchProducts();
@@ -92,7 +92,7 @@ export default function AdminProductsPage() {
                     ru: `${product.title.ru} (Копия)`
                 }
             };
-            await createProduct(duplicate);
+            await ProductRepository.create(duplicate);
             fetchProducts();
         } catch (error) {
             console.error("Error duplicating:", error);

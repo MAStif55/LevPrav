@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { StickerPack } from '@/types/product';
-import { getAllProducts } from '@/lib/firestore-utils';
+import { ProductRepository } from '@/lib/data';
 
 interface ProductCacheState {
     products: StickerPack[];
@@ -43,7 +43,7 @@ export const useProductCache = create<ProductCacheState>((set, get) => ({
         set({ loading: true, error: null });
 
         try {
-            const products = await getAllProducts();
+            const products = await ProductRepository.getAll();
             set({
                 products,
                 lastFetched: now,

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StickerPack } from '@/types/product';
-import { createProduct, updateProduct } from '@/lib/firestore-utils';
+import { ProductRepository } from '@/lib/data';
 import { Loader2, Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import ImageUpload from './ImageUpload';
@@ -88,9 +88,9 @@ export default function ProductForm({ initialData, isEditMode = false }: Product
 
         try {
             if (isEditMode && initialData?.id) {
-                await updateProduct(initialData.id, formData);
+                await ProductRepository.update(initialData.id, formData);
             } else {
-                await createProduct(formData as StickerPack);
+                await ProductRepository.create(formData as StickerPack);
             }
             router.push('/admin/products');
             router.refresh();

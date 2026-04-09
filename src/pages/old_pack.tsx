@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Head from 'next/head';
 import { useRouter } from "next/router";
 import { PackDetailsClient } from "@/components/packs/PackDetailsClient";
-import { getProductById } from "@/lib/firestore-utils";
+import { ProductRepository } from "@/lib/data";
 import { StickerPack } from "@/types/product";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
 
@@ -21,7 +21,7 @@ export default function PackPage() {
         }
 
         const loadPack = async () => {
-            const data = await getProductById(id);
+            const data = await ProductRepository.getById(id);
             setPack(data);
             setLoading(false);
         };

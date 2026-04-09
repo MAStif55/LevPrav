@@ -1,13 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-    User,
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    signOut as firebaseSignOut
-} from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { User } from 'firebase/auth'; // Importing type is safe
+import { AuthService } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -32,12 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
 
     useEffect(() => {
-        if (!auth) {
-            console.error("Auth instance is missing. Firebase initialization failed?");
-            setLoading(false);
-            return;
-        }
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = AuthService.onAuthStateChanged((currentUser) => {
             setUser(currentUser);
             setLoading(false);
         });
@@ -45,12 +35,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const login = async (email: string, pass: string) => {
-        await signInWithEmailAndPassword(auth, email, pass);
+        await AuthService.signIn(email, pass);
         router.push('/admin'); // Redirect to dashboard on success
     };
 
     const logout = async () => {
-        await firebaseSignOut(auth);
+        await AuthService.signOut();
         router.push('/admin/login');
     };
 

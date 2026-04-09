@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { PackCard } from "@/components/packs/PackCard";
 import { PackGridSkeleton } from "@/components/packs/PackCardSkeleton";
-import { getAllProducts } from "@/lib/firestore-utils";
+import { ProductRepository } from "@/lib/data";
 import { StickerPack } from "@/types/product";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -15,7 +15,7 @@ export default function PacksGalleryPage() {
     useEffect(() => {
         async function fetchProducts() {
             try {
-                const data = await getAllProducts();
+                const data = await ProductRepository.getAll();
                 setProducts(data);
             } catch (error) {
                 console.error("Error fetching products:", error);
